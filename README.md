@@ -1,2 +1,48 @@
 # Advertising.RData
-An overview of criteria and methods for assessing models followed by an  example involving a dataset with expenditures on newspaper, TV, and radio advertising along with sales.
+#set up
+install.packages("forecast")
+library(forecast)
+load("Advertising.RData")
+view(mydata)
+summary(mydata)
+install.packages("forecast")
+library(forecast)
+
+###PART 3###
+#model with no regressors 
+reg0 <- lm(Sales ~ 1, data = mydata)
+#gradually add 1 regressor in each stage
+reg1n <- lm(Sales ~ Newspaper, data = mydata)
+reg1r <- lm(Sales ~ Radio, data = mydata)
+reg1t <- lm(Sales ~ TV, data = mydata)
+reg2rt<-lm(Sales~ Radio+TV, data=mydata)
+reg2nt<-lm(Sales~ Newspaper+TV, data=mydata)
+reg2rn<-lm(Sales~ Radio+Newspaper, data=mydata)
+#full model with 3 regressors
+regall<-lm(Sales~Radio+Newspaper+TV, data=mydata)
+
+#calculate AIC,BIC, and CV
+#for null model
+CV(reg0)
+#for all possivle one variable combos
+CV(reg1n)
+CV(reg1r)
+CV(reg1t)
+#for all possible 2 variable combos
+CV(reg2rt)
+CV(reg2nt)
+CV(reg2rn)
+#for full model
+CV(regall)
+
+###PART 4###
+#set up
+install.packages("glmnet")
+library(glmnet)
+#tell the program which variable is your regressor and which is your outcome
+X=model.matrix(Sales~.,mydata)
+y=mydata$Sales
+#computes LASSO using lambda chosen by CV
+#alpha=1 chooses the LASSO estimation method
+lassoreg=cv.glmnet(X,y,alpha=1)
+predict(lassoreg,type="coefficients")
